@@ -1,19 +1,25 @@
 'use client';
 import { useState } from 'react';
-import { VideoCard } from '@/components/search/VideoCard';
+import VideoCard, { VideoCardProps } from '@/components/search/VideoCard';
 import type { VideoItem } from '@/lib/api/search-api';
 
-// 假设原有组件逻辑，核心修改 handleCardClick 函数
-export default function VideoGrid({ videos }: { videos: VideoItem[] }) {
+// 视频网格属性类型
+interface VideoGridProps {
+  videos: VideoItem[];
+  onCardClick?: VideoCardProps['onCardClick'];
+}
+
+// 默认导出（适配 SearchResults.tsx 的默认导入）
+export default function VideoGrid({ videos, onCardClick }: VideoGridProps) {
   const [activeCardId, setActiveCardId] = useState<string | number | null>(null);
 
-  // 核心修改：删除 e: React.MouseEvent 参数，仅保留 videoId 和 videoUrl
+  // 卡片点击回调（兼容双参，与 VideoCard 匹配）
   const handleCardClick = (videoId: string | number, videoUrl?: string) => {
-    // 原有业务逻辑（示例）：跳转播放页、记录活跃卡片等
     setActiveCardId(videoId);
+    // 传递点击事件给父组件（如需要）
+    onCardClick?.(videoId, videoUrl);
     if (videoUrl) {
       console.log('播放视频：', videoId, videoUrl);
-      // 可添加跳转逻辑：window.location.href = `/play?url=${encodeURIComponent(videoUrl)}`;
     }
   };
 
@@ -29,8 +35,7 @@ export default function VideoGrid({ videos }: { videos: VideoItem[] }) {
             video={video}
             cardId={cardId}
             isActive={isActive}
-            // 现在参数类型匹配，可以正常传入
-            onCardClick={handleCardClick}
+            onCardClick={handleCardClick} // 双参函数，类型完全匹配
           />
         );
       })}
