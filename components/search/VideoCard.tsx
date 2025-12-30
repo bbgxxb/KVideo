@@ -1,10 +1,11 @@
+'use client'; // 若组件未添加客户端标记，需补充（Next.js 13+ 客户端组件要求）
 import { memo } from 'react';
 import Link from 'next/link';
-import {Card }from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { TYPE_MAPPER } from '@/lib/constants/custom-types';
 
-// 视频卡片属性
+// 视频卡片属性类型定义
 export interface VideoCardProps {
   video: {
     vod_id: string | number;
@@ -65,10 +66,10 @@ export const VideoCard = memo<VideoCardProps>(({
                 {displayType}
               </Badge>
             )}
-            {/* 年份标签 */}
+            {/* 年份标签（核心修改：将 variant="outline" 改为 secondary） */}
             {video.vod_year && (
               <Badge
-                variant="outline"
+                variant="secondary" // 改为组件支持的类型，或删除该属性
                 className="absolute bottom-2 right-2 text-xs z-10"
               >
                 {video.vod_year}
@@ -93,3 +94,5 @@ export const VideoCard = memo<VideoCardProps>(({
     </div>
   );
 });
+
+export default VideoCard;
