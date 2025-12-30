@@ -10,7 +10,7 @@
 import { memo } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icons } from '@/components/ui/Icon';
-import { TypeBadgeList } from './TypeBadgeList';
+import  TypeBadgeList  from './TypeBadgeList';
 import type { TypeBadge } from '@/lib/types';
 
 interface TypeBadgesProps {
