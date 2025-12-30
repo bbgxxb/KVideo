@@ -1,5 +1,6 @@
 import { VideoSource } from "@/lib/types";
-import { TYPE_MAPPER } from "@/lib/constants/custom-types";
+import { TYPE_MAPPER, CUSTOM_RECOMMEND_VIDEOS } from "@/lib/constants/custom-types"; // 补充导入 CUSTOM_RECOMMEND_VIDEOS
+
 
 // 视频项类型定义
 export interface VideoItem {
