@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { TypeBadgeList } from '@/components/search/TypeBadgeList';
+import  TypeBadgeList from '@/components/search/TypeBadgeList';
 import { CUSTOM_VIDEO_TYPES, ALL_CUSTOM_TYPES, TYPE_MAPPER } from '@/lib/constants/custom-types';
 import { searchVideos } from '@/lib/api/search-api';
 
