@@ -86,3 +86,36 @@ export async function searchVideos(
 
     return Promise.all(searchPromises);
 }
+
+/**
+ * Search videos from multiple sources in parallel
+ */
+import { TYPE_MAPPER } from '@/lib/constants/custom-types'; // 引入映射规则
+
+export async function searchVideos(
+    query: string,
+    sources: VideoSource[],
+    page: number = 1
+): Promise<Array<{ results: VideoItem[]; source: string; responseTime?: number; error?: string }>> {
+    const searchPromises = sources.map(async source => {
+        try {
+            const result = await searchVideosBySource(query, source, page);
+            
+            // 核心：替换每一个视频的分类为自定义分类
+            result.results = result.results.map(video => ({
+                ...video,
+                type_name: TYPE_MAPPER[video.type_name] || TYPE_MAPPER["默认"]
+            }));
+            
+            return result;
+        } catch (error) {
+            return {
+                results: [],
+                source: source.id,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            };
+        }
+    });
+
+    return Promise.all(searchPromises);
+}
