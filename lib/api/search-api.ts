@@ -74,7 +74,7 @@ export async function searchVideos(
 
 // 获取推荐视频（替换豆瓣推荐）
 export async function getRecommendVideos(): Promise<VideoItem[]> {
-  from "@/lib/constants/custom-types";
+
   // 直接返回自定义推荐列表
   return CUSTOM_RECOMMEND_VIDEOS.map(video => ({
     ...video,
