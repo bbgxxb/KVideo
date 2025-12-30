@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import TypeBadgeList from '@/components/search/TypeBadgeList';
+import TypeBadgeList from '@/components/search/TypeBadgeList'; // 改为默认导入
 import { VideoCard } from '@/components/search/VideoCard';
 import { searchVideos } from '@/lib/api/search-api';
 import { CUSTOM_VIDEO_TYPES, ALL_CUSTOM_TYPES, TYPE_MAPPER } from '@/lib/constants/custom-types';
@@ -134,7 +134,6 @@ export default function SearchPage() {
               key={`${video.vod_id}-${video.source}`}
               video={video}
               onCardClick={() => {
-                // 此处可添加视频点击跳转逻辑
                 console.log("点击视频：", video.vod_name);
               }}
             />
