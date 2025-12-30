@@ -1,11 +1,10 @@
-'use client'; // 若组件未添加客户端标记，需补充（Next.js 13+ 客户端组件要求）
+'use client';
 import { memo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { TYPE_MAPPER } from '@/lib/constants/custom-types';
 
-// 视频卡片属性类型定义
 export interface VideoCardProps {
   video: {
     vod_id: string | number;
@@ -20,20 +19,16 @@ export interface VideoCardProps {
   isActive?: boolean;
 }
 
-// 视频卡片组件（记忆化优化）
 export const VideoCard = memo<VideoCardProps>(({
   video,
   onCardClick,
   isActive
 }) => {
-  // 确保分类为自定义分类
   const displayType = TYPE_MAPPER[video.type_name as keyof typeof TYPE_MAPPER] || TYPE_MAPPER["默认"];
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (onCardClick) {
-      onCardClick();
-    }
+    onCardClick?.();
   };
 
   return (
@@ -66,20 +61,20 @@ export const VideoCard = memo<VideoCardProps>(({
                 {displayType}
               </Badge>
             )}
-            {/* 年份标签（核心修改：将 variant="outline" 改为 secondary） */}
+            {/* 年份标签（已修复：variant 改为 secondary） */}
             {video.vod_year && (
               <Badge
-                variant="secondary" // 改为组件支持的类型，或删除该属性
-                className="absolute bottom-2 right-2 text-xs z-10"
+                variant="secondary"
+                className="absolute bottom-2 right-2 text-xs z-10 bg-gray-200"
               >
                 {video.vod_year}
               </Badge>
             )}
-            {/* 热播/完结标签 */}
+            {/* 热播/完结标签（核心修复：destructive 改为 secondary + 自定义红色样式） */}
             {video.vod_remarks && (
               <Badge
-                variant="destructive"
-                className="absolute top-2 left-2 text-xs z-10"
+                variant="secondary" // 改为组件支持的类型
+                className="absolute top-2 left-2 text-xs z-10 bg-red-500 text-white" // 自定义红色样式，还原原视觉
               >
                 {video.vod_remarks}
               </Badge>
