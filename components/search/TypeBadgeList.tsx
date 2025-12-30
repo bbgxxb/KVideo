@@ -1,140 +1,86 @@
-/**
- * TypeBadgeList - Badge list container with responsive layout
- * Desktop: Expandable grid with show more/less
- * Mobile: Horizontal scroll with snap
- */
-
 'use client';
+import { useState, useEffect } from 'react';
+import { TypeBadgeList } from '@/components/search/TypeBadgeList';
+import { CUSTOM_VIDEO_TYPES, ALL_CUSTOM_TYPES, TYPE_MAPPER } from '@/lib/constants/custom-types';
+import { searchVideos } from '@/lib/api/search-api';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Icons } from '@/components/ui/Icon';
-import { TypeBadgeItem } from './TypeBadgeItem';
-import { useKeyboardNavigation } from '@/lib/hooks/useKeyboardNavigation';
+export default function SearchPage() {
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [badges, setBadges] = useState(CUSTOM_VIDEO_TYPES); // 初始化为自定义分类
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
 
-interface TypeBadge {
-  type: string;
-  count: number;
-}
+  // 搜索逻辑（示例）
+  const handleSearch = async (query: string) => {
+    const sources = []; // 替换为你的数据源逻辑
+    const results = await searchVideos(query, sources);
+    const flatResults = results.flatMap(item => item.results);
+    setSearchResults(flatResults);
+  };
 
-interface TypeBadgeListProps {
-  badges: TypeBadge[];
-  selectedTypes: Set<string>;
-  onToggleType: (type: string) => void;
-}
-
-export function TypeBadgeList({ badges, selectedTypes, onToggleType }: TypeBadgeListProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [focusedIndex, setFocusedIndex] = useState(-1);
-  const [hasOverflow, setHasOverflow] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const badgeContainerRef = useRef<HTMLDivElement>(null);
-  const badgeRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  // Keyboard navigation
-  useKeyboardNavigation({
-    enabled: true,
-    containerRef: containerRef,
-    currentIndex: focusedIndex,
-    itemCount: badges.length,
-    orientation: 'horizontal',
-    onNavigate: useCallback((index: number) => {
-      setFocusedIndex(index);
-      badgeRefs.current[index]?.focus();
-      // Scroll into view for mobile
-      badgeRefs.current[index]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
-    }, []),
-    onSelect: useCallback((index: number) => {
-      onToggleType(badges[index].type);
-    }, [badges, onToggleType]),
-  });
-
-  // Check if content has overflow on mount and when badges change
+  // 统计自定义分类的视频数量
   useEffect(() => {
-    const checkOverflow = () => {
-      if (badgeContainerRef.current) {
-        const maxHeight = 50; // 50px to fit one row (44px) + padding but hide second row (starts at 52px)
-        setHasOverflow(badgeContainerRef.current.scrollHeight > maxHeight);
-      }
-    };
+    if (searchResults.length === 0) return;
 
-    checkOverflow();
-    // Recheck after a short delay to account for animations
-    const timeout = setTimeout(checkOverflow, 100);
-    return () => clearTimeout(timeout);
-  }, [badges]);
+    // 初始化所有自定义分类的count为0
+    const typeCount = ALL_CUSTOM_TYPES.reduce((acc, type) => {
+      acc[type] = 0;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // 遍历搜索结果，统计每个自定义分类的数量
+    searchResults.forEach(video => {
+      const customType = video.type_name || TYPE_MAPPER["默认"];
+      if (typeCount[customType] !== undefined) {
+        typeCount[customType]++;
+      }
+    });
+
+    // 更新Badges的count值
+    setBadges(CUSTOM_VIDEO_TYPES.map(item => ({
+      ...item,
+      count: typeCount[item.type] || 0
+    })));
+  }, [searchResults]);
+
+  // 分类筛选切换逻辑
+  const onToggleType = (type: string) => {
+    const newSelected = new Set(selectedTypes);
+    if (newSelected.has(type)) {
+      newSelected.delete(type);
+    } else {
+      newSelected.add(type);
+    }
+    setSelectedTypes(newSelected);
+
+    // 筛选搜索结果（仅显示选中分类的视频）
+    if (newSelected.size === 0) {
+      // 无选中分类时显示全部
+      setSearchResults(prev => prev);
+    } else {
+      const filtered = searchResults.filter(video => newSelected.has(video.type_name));
+      setSearchResults(filtered);
+    }
+  };
 
   return (
-    <>
-      {/* Desktop: Expandable Grid */}
-      <div
-        ref={containerRef}
-        className="hidden md:flex md:flex-col md:flex-1 -mx-1 px-1"
-        role="group"
-        aria-label="类型筛选"
-      >
-        <div className={`relative transition-all duration-300 z-10 ${!isExpanded ? 'max-h-[50px] overflow-hidden' : 'overflow-visible'
-          }`}>
-          <div
-            ref={badgeContainerRef}
-            className="flex items-center gap-2 flex-wrap p-1"
-          >
-            {badges.map((badge, index) => (
-              <TypeBadgeItem
-                key={badge.type}
-                type={badge.type}
-                count={badge.count}
-                isSelected={selectedTypes.has(badge.type)}
-                onToggle={() => onToggleType(badge.type)}
-                isFocused={focusedIndex === index}
-                onFocus={() => setFocusedIndex(index)}
-                innerRef={(el) => { badgeRefs.current[index] = el; }}
-              />
-            ))}
+    <div>
+      {/* 自定义分类筛选标签 */}
+      <TypeBadgeList
+        badges={badges}
+        selectedTypes={selectedTypes}
+        onToggleType={onToggleType}
+      />
+      {/* 搜索结果展示 */}
+      <div className="mt-4">
+        {searchResults.map(video => (
+          <div key={video.vod_id} className="p-2 border-b">
+            <h3>{video.vod_name}</h3>
+            <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+              {video.type_name} {/* 显示自定义分类 */}
+            </span>
           </div>
-        </div>
-        {hasOverflow && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-2 text-xs text-[var(--text-color-secondary)] hover:text-[var(--accent-color)]
-                     flex items-center gap-1 transition-colors self-start cursor-pointer"
-          >
-            <span>{isExpanded ? '收起' : '展开更多'}</span>
-            <Icons.ChevronDown
-              size={14}
-              className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-            />
-          </button>
-        )}
+        ))}
       </div>
-
-      {/* Mobile & Tablet: Horizontal Scroll */}
-      <div
-        className="flex md:hidden flex-1 -mx-1 px-1 overflow-hidden"
-        role="group"
-        aria-label="类型筛选"
-      >
-        <div
-          ref={containerRef}
-          className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
-        >
-          {badges.map((badge, index) => (
-            <TypeBadgeItem
-              key={badge.type}
-              type={badge.type}
-              count={badge.count}
-              isSelected={selectedTypes.has(badge.type)}
-              onToggle={() => onToggleType(badge.type)}
-              isFocused={focusedIndex === index}
-              onFocus={() => setFocusedIndex(index)}
-              innerRef={(el) => { badgeRefs.current[index] = el; }}
-            />
-          ))}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
