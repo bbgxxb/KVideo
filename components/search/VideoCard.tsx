@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
+import {Card }from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { TYPE_MAPPER } from '@/lib/constants/custom-types';
 
 // 视频卡片属性
