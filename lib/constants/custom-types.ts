@@ -1,4 +1,4 @@
-// 自定义分类列表（用于筛选标签展示、排序）
+// 自定义分类列表（完整覆盖豆瓣分类）
 export const CUSTOM_VIDEO_TYPES = [
   { type: "都市", count: 0 },
   { type: "赘婿", count: 0 },
@@ -50,9 +50,8 @@ export const CUSTOM_VIDEO_TYPES = [
   { type: "家庭", count: 0 },
 ];
 
-// 豆瓣原分类 → 自定义分类的映射（兜底规则：无匹配则归为「现实」）
+// 豆瓣分类 → 自定义分类 映射（兜底：无匹配归为「现实」）
 export const TYPE_MAPPER = {
-  // 豆瓣常见分类 → 你的自定义分类（按需调整映射关系）
   "剧情": "现实",
   "喜剧": "喜剧",
   "动作": "战神",
@@ -84,9 +83,61 @@ export const TYPE_MAPPER = {
   "脱口秀": "搞笑",
   "儿童": "萌宝",
   "伦理": "豪门恩怨",
-  "情色": "成人", // 成人内容单独分类（如需）
-  "默认": "现实" // 兜底分类
+  "情色": "成人",
+  "默认": "现实"
 };
 
-// 快捷获取所有自定义分类的type列表
+// 自定义推荐列表（替换豆瓣推荐数据，可自行修改）
+export const CUSTOM_RECOMMEND_VIDEOS = [
+  {
+    vod_id: "custom_reco_1",
+    vod_name: "都市赘婿：战神归来",
+    vod_pic: "https://picsum.photos/200/300?random=1",
+    type_name: "赘婿",
+    vod_remarks: "热门",
+    source: "custom"
+  },
+  {
+    vod_id: "custom_reco_2",
+    vod_name: "古代言情：甜宠王妃",
+    vod_pic: "https://picsum.photos/200/300?random=2",
+    type_name: "古代言情",
+    vod_remarks: "高分",
+    source: "custom"
+  },
+  {
+    vod_id: "custom_reco_3",
+    vod_name: "神医：马甲遍地走",
+    vod_pic: "https://picsum.photos/200/300?random=3",
+    type_name: "神医",
+    vod_remarks: "热播",
+    source: "custom"
+  },
+  {
+    vod_id: "custom_reco_4",
+    vod_name: "职场商战：逆袭成首富",
+    vod_pic: "https://picsum.photos/200/300?random=4",
+    type_name: "职场商战",
+    vod_remarks: "完结",
+    source: "custom"
+  },
+  {
+    vod_id: "custom_reco_5",
+    vod_name: "悬疑：豪门恩怨与复仇",
+    vod_pic: "https://picsum.photos/200/300?random=5",
+    type_name: "悬疑",
+    vod_remarks: "连载",
+    source: "custom"
+  },
+  {
+    vod_id: "custom_reco_6",
+    vod_name: "年代致富：从摆摊开始",
+    vod_pic: "https://picsum.photos/200/300?random=6",
+    type_name: "致富",
+    vod_remarks: "经典",
+    source: "custom"
+  }
+];
+
+// 所有自定义分类类型集合
 export const ALL_CUSTOM_TYPES = CUSTOM_VIDEO_TYPES.map(item => item.type);
