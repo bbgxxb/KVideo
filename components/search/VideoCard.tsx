@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { TYPE_MAPPER } from '@/lib/constants/custom-types';
 
+// 核心修改：扩展 onCardClick 类型，支持传入参数（兼容无参和带参调用）
 export interface VideoCardProps {
   video: {
     vod_id: string | number;
@@ -14,21 +15,29 @@ export interface VideoCardProps {
     type_name?: string;
     vod_year?: string;
     source: string;
+    play_url?: string; // 确保 video 包含 play_url（用于传递给 handleCardClick）
   };
-  onCardClick?: () => void;
+  cardId?: string | number;
   isActive?: boolean;
+  // 支持无参调用，也支持传入视频ID和播放URL（兼容原有逻辑）
+  onCardClick?: () => void | ((videoId: string | number, videoUrl?: string) => void);
 }
 
 export const VideoCard = memo<VideoCardProps>(({
   video,
-  onCardClick,
-  isActive
+  cardId,
+  isActive,
+  onCardClick
 }) => {
   const displayType = TYPE_MAPPER[video.type_name as keyof typeof TYPE_MAPPER] || TYPE_MAPPER["默认"];
 
+  // 核心修改：点击事件触发时，传递 videoId 和 play_url 给 onCardClick
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    onCardClick?.();
+    if (typeof onCardClick === 'function') {
+      // 传递视频ID和播放URL（与 VideoGrid 的 handleCardClick 参数对应）
+      onCardClick(video.vod_id, video.play_url);
+    }
   };
 
   return (
@@ -61,7 +70,7 @@ export const VideoCard = memo<VideoCardProps>(({
                 {displayType}
               </Badge>
             )}
-            {/* 年份标签（已修复：variant 改为 secondary） */}
+            {/* 年份标签 */}
             {video.vod_year && (
               <Badge
                 variant="secondary"
@@ -70,11 +79,11 @@ export const VideoCard = memo<VideoCardProps>(({
                 {video.vod_year}
               </Badge>
             )}
-            {/* 热播/完结标签（核心修复：destructive 改为 secondary + 自定义红色样式） */}
+            {/* 热播/完结标签 */}
             {video.vod_remarks && (
               <Badge
-                variant="secondary" // 改为组件支持的类型
-                className="absolute top-2 left-2 text-xs z-10 bg-red-500 text-white" // 自定义红色样式，还原原视觉
+                variant="secondary"
+                className="absolute top-2 left-2 text-xs z-10 bg-red-500 text-white"
               >
                 {video.vod_remarks}
               </Badge>
