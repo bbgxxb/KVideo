@@ -2,7 +2,7 @@
 import { ResultsHeader } from '@/components/search/ResultsHeader';
 import { SourceBadges } from '@/components/search/SourceBadges';
 import { TypeBadges } from '@/components/search/TypeBadges';
-import { VideoGrid } from '@/components/search/VideoGrid';
+import VideoGrid from '@/components/search/VideoGrid';
 import { useSourceBadges } from '@/lib/hooks/useSourceBadges';
 import { useTypeBadges } from '@/lib/hooks/useTypeBadges';
 import { Video, SourceBadge } from '@/lib/types';
