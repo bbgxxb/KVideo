@@ -1,67 +1,61 @@
-
-import { ResultsHeader } from '@/components/search/ResultsHeader';
+'use client';
+import { useState } from 'react';
 import { SourceBadges } from '@/components/search/SourceBadges';
 import { TypeBadges } from '@/components/search/TypeBadges';
+// 核心修复：默认导入 VideoGrid（与 VideoGrid.tsx 的默认导出匹配）
 import VideoGrid from '@/components/search/VideoGrid';
 import { useSourceBadges } from '@/lib/hooks/useSourceBadges';
 import { useTypeBadges } from '@/lib/hooks/useTypeBadges';
 import { Video, SourceBadge } from '@/lib/types';
 
+// 搜索结果属性类型
 interface SearchResultsProps {
-    results: Video[];
-    availableSources: SourceBadge[];
-    loading: boolean;
+  initialVideos?: Video[];
+  isAdult?: boolean;
 }
 
-export function SearchResults({ results, availableSources, loading }: SearchResultsProps) {
-    // Source badges hook - filters by video source
-    const {
-        selectedSources,
-        filteredVideos: sourceFilteredVideos,
-        toggleSource,
-    } = useSourceBadges(results, availableSources);
+export default function SearchResults({ initialVideos = [], isAdult = false }: SearchResultsProps) {
+  const [videos, setVideos] = useState<Video[]>(initialVideos);
+  const { sourceBadges, selectedSources, onToggleSource } = useSourceBadges();
+  const { typeBadges, selectedTypes, onToggleType } = useTypeBadges();
 
-    // Type badges hook - auto-collects and filters by type_name
-    // Apply on source-filtered results for combined filtering
-    const {
-        typeBadges,
-        selectedTypes,
-        filteredVideos: finalFilteredVideos,
-        toggleType,
-    } = useTypeBadges(sourceFilteredVideos);
+  // 视频卡片点击回调（兼容双参）
+  const handleCardClick = (videoId: string | number, videoUrl?: string) => {
+    console.log('点击视频卡片：', videoId, videoUrl);
+    // 可添加跳转播放页逻辑
+    if (videoUrl) {
+      window.location.href = `/play?vid=${videoId}&url=${encodeURIComponent(videoUrl)}`;
+    }
+  };
 
-    if (results.length === 0 && !loading) return null;
+  return (
+    <div className="space-y-4">
+      {/* 来源标签筛选 */}
+      <SourceBadges
+        badges={sourceBadges as SourceBadge[]}
+        selectedSources={selectedSources}
+        onToggleSource={onToggleSource}
+      />
 
-    return (
-        <div className="animate-fade-in">
-            <ResultsHeader
-                loading={loading}
-                resultsCount={results.length}
-                availableSources={availableSources}
-            />
+      {/* 分类标签筛选 */}
+      <TypeBadges
+        badges={typeBadges}
+        selectedTypes={selectedTypes}
+        onToggleType={onToggleType}
+      />
 
-            {/* Source Badges - Clickable video source filtering */}
-            {availableSources.length > 0 && (
-                <SourceBadges
-                    sources={availableSources}
-                    selectedSources={selectedSources}
-                    onToggleSource={toggleSource}
-                    className="mb-6"
-                />
-            )}
+      {/* 视频网格（默认导入，类型匹配） */}
+      <VideoGrid
+        videos={videos}
+        onCardClick={handleCardClick}
+      />
 
-            {/* Type Badges - Auto-collected from search results */}
-            {typeBadges.length > 0 && (
-                <TypeBadges
-                    badges={typeBadges}
-                    selectedTypes={selectedTypes}
-                    onToggleType={toggleType}
-                    className="mb-6"
-                />
-            )}
-
-            {/* Display filtered videos (both source and type filters applied) */}
-            <VideoGrid videos={finalFilteredVideos} />
+      {/* 无结果提示 */}
+      {videos.length === 0 && (
+        <div className="flex justify-center items-center py-10 text-gray-500">
+          暂无匹配的视频结果，请调整筛选条件重试
         </div>
-    );
+      )}
+    </div>
+  );
 }
